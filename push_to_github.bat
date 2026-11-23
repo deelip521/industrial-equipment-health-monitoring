@@ -11,7 +11,7 @@ echo Current remote origin:
 git remote -v
 echo.
 echo Pushing branch 'main' to origin...
-git push -u origin main
+git push -u origin main --force
 
 if %ERRORLEVEL% equ 0 (
     echo.
