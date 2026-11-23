@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Industrial Equipment Health Monitoring System</title>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <nav class="navbar">
+        <div class="brand">
+            <div class="brand-icon">⚙️</div>
+            <div>
+                <div class="brand-title">IIoT Equipment Health & Predictive Maintenance Platform</div>
+                <div class="brand-subtitle">Smart Manufacturing Domain | Real-Time Telemetry & Anomaly Detection</div>
+            </div>
+        </div>
+        <div class="nav-actions">
+            <div class="stream-pill" id="streamStatusPill">
+                <div class="pulse-dot"></div>
+                <span>IoT Core Stream: Connected</span>
+            </div>
+            <a href="/report/CNC-M01" target="_blank" class="btn-report" id="reportLink">
+                📄 Generate Daily Report
+            </a>
+        </div>
+    </nav>
+
+    <!-- Machine Selector Strip -->
+    <div class="machine-bar" id="machineSelectorBar">
+        <!-- Injected via JavaScript -->
+    </div>
+
+    <div class="dashboard-container">
+
+        <!-- Live Fault Injection & Simulation Control Center -->
+        <div class="simulator-panel">
+            <div class="sim-title">
+                <span>⚡ Live IoT Simulator Controls (Active: <b id="activeMachineTitle">CNC-M01</b>)</span>
+            </div>
+            <div class="sim-controls">
+                <button class="sim-btn success" id="btnSimNormal">🌱 Restore Normal Mode</button>
+                <button class="sim-btn danger" id="btnSimOverheat">🔥 Simulate Overheating (>80°C)</button>
+                <button class="sim-btn danger" id="btnSimVibration">📳 Inject Vibration Spike (>5.0 mm/s)</button>
+                <button class="sim-btn warning" id="btnSimHighLoad">⚡ Run High Load Test</button>
+                <button class="sim-btn danger" id="btnSimCritical">💥 Combined Critical Failure</button>
+                <button class="sim-btn" id="btnClearAlerts" style="background:#334155;">🧹 Clear Alert Log</button>
+            </div>
+        </div>
+
+        <!-- Telemetry Gauges / Metric Cards -->
+        <div class="telemetry-grid">
+            <!-- Temperature -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Temperature</span>
+                    <span class="card-badge badge normal" id="badgeTemp">NORMAL</span>
+                </div>
+                <div class="val-display">
+                    <span class="val-number" id="valTemperature">--</span>
+                    <span class="val-unit">°C</span>
+                </div>
+                <div class="card-subtext">Alert Rule Threshold: <b>&gt; 80.0 °C</b></div>
+            </div>
+
+            <!-- Vibration Level -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Vibration Level</span>
+                    <span class="card-badge badge normal" id="badgeVib">NORMAL</span>
+                </div>
+                <div class="val-display">
+                    <span class="val-number" id="valVibration">--</span>
+                    <span class="val-unit">mm/s</span>
+                </div>
+                <div class="card-subtext">ISO Alert Threshold: <b>&gt; 5.0 mm/s</b></div>
+            </div>
+
+            <!-- Pressure -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Operating Pressure</span>
+                    <span class="card-badge badge normal" id="badgePressure">NOMINAL</span>
+                </div>
+                <div class="val-display">
+                    <span class="val-number" id="valPressure">--</span>
+                    <span class="val-unit">bar</span>
+                </div>
+                <div class="card-subtext">Safe Range: <b>2.0 - 9.0 bar</b></div>
+            </div>
+
+            <!-- Power Consumption -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Power Draw</span>
+                    <span class="card-badge badge normal" id="badgePower">ONLINE</span>
+                </div>
+                <div class="val-display">
+                    <span class="val-number" id="valPower">--</span>
+                    <span class="val-unit">kW</span>
+                </div>
+                <div class="card-subtext">Instantaneous Electrical Load</div>
+            </div>
+        </div>
+
+        <!-- Predictive Maintenance & Health Hero Section -->
+        <div class="hero-health-grid">
+            <!-- Equipment Health Score -->
+            <div class="health-gauge-card">
+                <div class="card-header">
+                    <span class="card-title">Equipment Health Score</span>
+                    <span class="card-badge badge normal">Multi-variate Index</span>
+                </div>
+                <div class="gauge-wrapper">
+                    <div class="health-circle normal" id="healthCircle">
+                        <span class="health-val" id="healthScoreNumber">98%</span>
+                        <span class="health-label">System Health</span>
+                    </div>
+                </div>
+                <div class="prescriptive-box">
+                    <div style="color: #38bdf8; font-weight: 700; margin-bottom: 4px;">ENGINEERING DIAGNOSTIC:</div>
+                    <div id="diagnosticText">Machine operating at prime efficiency. Vibration and thermal signatures normal.</div>
+                </div>
+            </div>
+
+            <!-- Failure Prediction Indicators -->
+            <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <div class="card-header">
+                        <span class="card-title">Failure Prediction Indicators & RUL</span>
+                        <span class="card-badge badge normal" id="predStatusBadge">PREDICTIVE ANALYTICS</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                        <div style="background: rgba(15, 20, 28, 0.6); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+                            <div style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase;">Failure Risk Probability (48h)</div>
+                            <div style="font-size: 26px; font-weight: 800; color: #f59e0b; margin-top: 4px;" id="valFailureRisk">2.4%</div>
+                            <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Predicted Failure Mode: <b id="valFailureMode">None (Healthy)</b></div>
+                        </div>
+                        <div style="background: rgba(15, 20, 28, 0.6); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+                            <div style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase;">Remaining Useful Life (RUL)</div>
+                            <div style="font-size: 26px; font-weight: 800; color: #10b981; margin-top: 4px;" id="valRulHours">2450 hrs</div>
+                            <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Estimated before scheduled rebuild</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="prescriptive-box" style="margin-top: 15px; background: rgba(30, 41, 59, 0.4);">
+                    <div style="color: #10b981; font-weight: 700; margin-bottom: 4px;">PRESCRIPTIVE MAINTENANCE ACTION:</div>
+                    <div id="prescriptiveActionText">Standard preventative maintenance routine active. Next lubrication check in 30 days.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Real-Time Charts (Dual View) -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">Real-Time Temperature & Vibration Telemetry</div>
+                    <div class="chart-legend">Rules: Temp &gt; 80°C | Vib &gt; 5.0 mm/s</div>
+                </div>
+                <div style="position: relative; height: 230px;">
+                    <canvas id="tempVibChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">Real-Time Pressure & Power Consumption</div>
+                    <div class="chart-legend">Pressure (bar) & Power (kW)</div>
+                </div>
+                <div style="position: relative; height: 230px;">
+                    <canvas id="pressPwrChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Analytics & Utilization Statistics -->
+        <div class="analytics-grid">
+            <div class="card">
+                <div class="card-title">Average Machine Temperature</div>
+                <div class="val-display">
+                    <span class="val-number" id="statAvgTemp" style="font-size: 24px;">--</span>
+                </div>
+                <div class="card-subtext">Historical Mean Operation</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Vibration Trend Analysis</div>
+                <div class="val-display">
+                    <span class="val-number" id="statVibTrend" style="font-size: 18px; color: #38bdf8;">STABLE</span>
+                </div>
+                <div class="card-subtext">Rolling regression slope</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Energy Consumption Trend</div>
+                <div class="val-display">
+                    <span class="val-number" id="statEnergyKwh" style="font-size: 24px; color: #eab308;">--</span>
+                </div>
+                <div class="card-subtext">Cumulative power integrated</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Equipment Utilisation</div>
+                <div class="val-display">
+                    <span class="val-number" id="statUtilisation" style="font-size: 24px; color: #10b981;">--</span>
+                </div>
+                <div class="card-subtext">Overall operational uptime</div>
+            </div>
+        </div>
+
+        <!-- Maintenance Alerts Log Table -->
+        <div class="alerts-card">
+            <div class="alerts-header">
+                <div>
+                    <h3 style="font-size: 16px; font-weight: 700;">Live Maintenance Alerts Log</h3>
+                    <div style="font-size: 12px; color: var(--text-secondary);">Real-time violation events evaluated against automated threshold rules</div>
+                </div>
+            </div>
+            <div style="overflow-x: auto;">
+                <table class="alerts-table">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Machine ID</th>
+                            <th>Severity</th>
+                            <th>Rule Triggered</th>
+                            <th>Description</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="alertsTableBody">
+                        <tr>
+                            <td colspan="6" style="text-align:center; color:#64748b; padding:16px;">Loading alerts...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
